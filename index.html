@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30 Dni Koktajli</title>
+    <style>
+        /* --- OGÓLNY STYL I ZMIENNE --- */
+        :root {
+            --primary-color: #4CAF50; /* Zieleń */
+            --secondary-color: #8BC34A; /* Jasna zieleń */
+            --text-color: #333;
+            --background-color: #f7f7f7;
+            --completed-color: #E8F5E9; /* Bardzo jasna zieleń */
+            --action-color: #FF9800; /* Pomarańcz - Akcent */
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s;
+        }
+
+        /* --- STYLY EKRANU GŁÓWNEGO --- */
+        #home-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, var(--completed-color), var(--background-color));
+        }
+
+        .logo-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #home-screen h1 {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        #home-screen p {
+            font-size: 18px;
+            color: var(--text-color);
+            margin-bottom: 40px;
+            max-width: 350px;
+        }
+
+        .start-button {
+            padding: 15px 40px;
+            background-color: var(--action-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .start-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 5px rgba(255, 152, 0, 0.5);
+        }
+
+        /* --- STYLY EKRANU APLIKACJI (Z KOKTAJLE.HTML) --- */
+        #app-screen {
+            display: none; /* Ukryte domyślnie */
+            padding-bottom: 90px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+            position: sticky; /* Zatrzymuje nagłówek na górze */
+            top: 0;
+            z-index: 50;
+        }
+
+        .app-header h1 {
+            font-size: 24px;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .container {
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* KARTY DNI */
+        .day-card {
+            background-color: white;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            position: relative;
+        }
+
+        /* Styl dla ukończonego dnia */
+        .day-card.completed {
+            background-color: var(--completed-color);
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        /* Styl dla AKTYWNEGO dnia */
+        .day-card.active {
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.4);
+            border: 2px solid var(--action-color);
+            transform: scale(1.02);
+            order: -1;
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .day-header h2 {
+            font-size: 18px;
+            margin: 0;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+
+        .day-header .day-number {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        /* Szczegóły (rozwijane) */
+        .shake-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding-top: 0;
+        }
+
+        .day-card.open .shake-details {
+            max-height: 300px;
+            padding-top: 10px;
+        }
+
+        .shake-details p {
+            margin: 5px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .toggle-icon {
+            font-size: 20px;
+            transform: rotate(0deg);
+            transition: transform 0.3s;
+            margin-left: 10px;
+        }
+
+        .day-card.open .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Checkbox */
+        .checkbox {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 25px;
+            width: 25px;
+            background-color: #eee;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .day-card.completed .checkmark {
+            background-color: var(--secondary-color);
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 9px;
+            top: 5px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+        .day-card.completed .checkmark:after {
+            display: block;
+        }
+
+        /* PRZYCISK GŁÓWNEJ AKCJI (FIXED FOOTER) */
+        #action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            box-sizing: border-box;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        #complete-button {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--action-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        #complete-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #complete-button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+        
+        /* WIZUALNA STABILIZACJA */
+        #shake-list {
+            opacity: 0;
+            transition: opacity 0.2s ease-in;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- 1. EKRAN GŁÓWNY (POWITANIE) -->
+    <div id="home-screen">
+        <div class="logo-icon">🍹</div>
+        <h1>30 Dni Zdrowych Koktajli</h1>
+        <p>Rozpocznij swoje wyzwanie już dziś! Odkryj 30 unikalnych, pożywnych przepisów i śledź swoje postępy prosto na telefonie.</p>
+        <button class="start-button" onclick="launchApp()">Rozpocznij Wyzwanie!</button>
+    </div>
+
+    <!-- 2. EKRAN APLIKACJI (PLAN KOKTAJLOWY) -->
+    <div id="app-screen">
+        <header class="app-header">
+            <h1>💪 30 Dni Koktajli</h1>
+            <p style="font-size: 14px; opacity: 0.8; margin-top: 5px;">Plan jest interaktywny i zapisuje Twój postęp!</p>
+        </header>
+
+        <div class="container" id="shake-list">
+            <!-- Karty dni zostaną wygenerowane przez JavaScript -->
+        </div>
+
+        <!-- Pasek z przyciskiem akcji -->
+        <div id="action-bar">
+            <button id="complete-button" disabled>Ładowanie...</button>
+        </div>
+    </div>
+
+    <script>
+        // DANE PLANU DIETY (W JĘZYKU POLSKIM)
+        const shakePlan = [
+            { day: 1, name: "Podstawowa Zielenina", ingredients: "Szpinak, Banan, Mleko Migdałowe, Nasiona Chia (omega-3, błonnik)." },
+            { day: 2, name: "Jagodowa Bomba Antyoksydacyjna", ingredients: "Mieszanka Jagód (antyoksydanty), Jogurt Grecki (białko), Woda, Miód (opcjonalnie)." },
+            { day: 3, name: "Tropikalna Odporność", ingredients: "Mango, Ananas (Witamina C), Woda Kokosowa (elektrolity), Imbir." },
+            { day: 4, name: "Orzechowy Power", ingredients: "Masło Orzechowe (białko, zdrowe tłuszcze), Banan, Płatki Owsiane (błonnik), Mleko." },
+            { day: 5, name: "Kremowa Rozkosz z Awokado", ingredients: "Awokado (zdrowe tłuszcze), Szpinak, Jabłko, Woda/Lód." },
+            { day: 6, name: "Czekoladowa Regeneracja", ingredients: "Mrożone Wiśnie (przeciwzapalne), Kakao Naturalne, Odżywka Białkowa (opcjonalnie), Woda." },
+            { day: 7, name: "Energia z Chia", ingredients: "Mleko Migdałowe, Banan, Cynamon, 2 łyżki Nasion Chia (namoczone)." },
+            // Tydzień 2: Błonnik
+            { day: 8, name: "Pomarańczowy Blask Marchewki", ingredients: "Marchew, Pomarańcza (Witaminy A i C), Imbir, Siemię Lniane (błonnik)." },
+            { day: 9, name: "Daktyle i Orzechy Włoskie", ingredients: "Namoczone Daktyle, Orzechy Włoskie (omega-3), Mleko, Ekstrakt Waniliowy." },
+            { day: 10, name: "Probiotyczny Kefir", ingredients: "Kefir (probiotyki), Borówki, Banan, Woda." },
+            { day: 11, name: "Owsiany Koktajl Śniadaniowy", ingredients: "Płatki Owsiane, Odżywka Białkowa, Cynamon, Woda/Mleko." },
+            { day: 12, name: "Brzoskwinia-Imbir Błonnik", ingredients: "Mrożone Brzoskwinie, Jogurt Grecki, Mielony Imbir, Łuska Babki Jajowatej (opcjonalnie)." },
+            { day: 13, name: "Czerwony Burak Detoks", ingredients: "Ugotowany Burak, Jabłko, Sok z Cytryny, Woda." },
+            { day: 14, name: "Konopne Kompletne", ingredients: "Nasiona Konopi (białko), Jarmuż, Banan, Mleko/Woda." },
+            // Tydzień 3: Mózg i Tłuszcze
+            { day: 15, name: "Masło Migdałowe Bliss", ingredients: "Masło Migdałowe (Witamina E), Banan, Kakao ziarna, Mleko Migdałowe." },
+            { day: 16, name: "Szpinakowo-Gruszkowa Zielenina", ingredients: "Gruszka (błonnik), Szpinak, 1 łyżka Oleju Kokosowego (MCT/zdrowe tłuszcze), Woda." },
+            { day: 17, name: "Kurkuma Przeciwzapalna", ingredients: "Mrożone Mango, Kurkuma w Proszku, Czarny Pieprz, Mleko Kokosowe." },
+            { day: 18, name: "Twarożek Kremowy", ingredients: "Serek Wiejski (białko), Ananas, Woda/Lód." },
+            { day: 19, name: "Mieszanka Nasion", ingredients: "Banan, Szpinak, Pestki Dyni, Nasiona Słonecznika (minerały)." },
+            { day: 20, name: "Masło Orzechowe Power", ingredients: "Orzechy Nerkowca/Masło Nerkowcowe, Syrop Klonowy (opcjonalnie), Mleko, Lód." },
+            { day: 21, name: "Espresso Kickstart", ingredients: "Kawa Parzona na Zimno, Banan, Odżywka Białkowa, Lód, Mleko." },
+            // Tydzień 4: Superfoods
+            { day: 22, name: "Arbuzowy Nawadniacz", ingredients: "Arbuz (nawodnienie, likopen), Sok z Limonki, Mięta." },
+            { day: 23, name: "Papaja na Trawienie", ingredients: "Papaja (enzymy trawienne), Banan, Woda, Miód (opcjonalnie)." },
+            { day: 24, name: "Spirulina na Minerały", ingredients: "Banan, Ananas, Szpinak, 1 łyżeczka Spiruliny w Proszku, Woda." },
+            { day: 25, name: "Koktajl Słodki Ziemniak", ingredients: "Ugotowany Batat, Cynamon, Gałka Muszkatołowa, Mleko." },
+            { day: 26, name: "Tofu na Białko", ingredients: "Silken Tofu (białko), Jagody, Ekstrakt Waniliowy, Woda/Mleko." },
+            { day: 27, name: "Kiwi Witamina C", ingredients: "Kiwi (Witamina C), Zielone Winogrona, Szpinak, Woda." },
+            { day: 28, name: "Smoothie Czarny Las", ingredients: "Jeżyny, Kakao Naturalne, Jogurt Grecki, Mleko Migdałowe." },
+            // Koniec
+            { day: 29, name: "Ulubiony Restart", ingredients: "Wybierz swój ulubiony koktajl z dni 1-28. Ciesz się!" },
+            { day: 30, name: "Zbilansowany Pełny Koktajl", ingredients: "Szpinak, Banan, 1 łyżka Siemię Lniane, 1 łyżka Odżywka Białkowa, 1 łyżka Masło Orzechowe, Woda/Mleko." }
+        ];
+
+        let completedDays = {};
+        const completionKey = 'shakePlanCompletion';
+        
+        // Elementy DOM
+        const homeScreen = document.getElementById('home-screen');
+        const appScreen = document.getElementById('app-screen');
+        const listElement = document.getElementById('shake-list');
+        const completeButton = document.getElementById('complete-button');
+
+
+        // --- LOGIKA APLIKACJI KOKTAJLOWEJ ---
+
+        function findCurrentDay() {
+            for (let i = 1; i <= shakePlan.length; i++) {
+                if (!completedDays[i]) {
+                    return i;
+                }
+            }
+            return shakePlan.length + 1;
+        }
+
+        function updateActionButton(currentDay) {
+            if (currentDay > shakePlan.length) {
+                completeButton.textContent = "🥳 PLAN UKOŃCZONY!";
+                completeButton.disabled = true;
+            } else {
+                const shakeName = shakePlan.find(item => item.day === currentDay).name;
+                completeButton.textContent = `Ukończ DZIEŃ ${currentDay}: ${shakeName}`;
+                completeButton.disabled = false;
+            }
+        }
+
+        window.completeCurrentDay = function() {
+            const currentDay = findCurrentDay();
+
+            if (currentDay <= shakePlan.length) {
+                completedDays[currentDay] = true;
+                localStorage.setItem(completionKey, JSON.stringify(completedDays));
+
+                const nextDay = currentDay + 1;
+                if (nextDay <= shakePlan.length) {
+                    setTimeout(() => {
+                        const nextCard = document.querySelector(`.day-card[data-day="${nextDay}"]`);
+                        if (nextCard) {
+                            nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 50);
+                }
+                
+                renderPlan();
+            }
+        }
+
+        window.toggleCompletion = function(day, event) {
+            if (event) event.stopPropagation();
+
+            if (completedDays[day]) {
+                delete completedDays[day];
+            } else {
+                completedDays[day] = true;
+            }
+
+            localStorage.setItem(completionKey, JSON.stringify(completedDays));
+            renderPlan();
+        }
+
+        function renderPlan() {
+            listElement.innerHTML = '';
+            const currentDay = findCurrentDay();
+            const fragment = document.createDocumentFragment();
+
+            shakePlan.forEach(item => {
+                const isCompleted = completedDays[item.day] === true;
+                const isActive = item.day === currentDay;
+
+                const card = document.createElement('div');
+                card.className = `day-card ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`;
+                card.dataset.day = item.day;
+
+                card.innerHTML = `
+                    <div class="day-header" tabindex="0">
+                        <h2>
+                            <span class="day-number">DZIEŃ ${item.day}</span> ${item.name}
+                            ${isActive ? '<span style="color: var(--action-color); font-size: 14px; margin-left: 10px;">(DZIŚ)</span>' : ''}
+                        </h2>
+                        <div style="display: flex; align-items: center;">
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                    </div>
+                    <div class="shake-details">
+                        <p><strong>Składniki:</strong> ${item.ingredients}</p>
+                    </div>
+                    <label class="checkbox" onclick="toggleCompletion(${item.day}, event)">
+                        <span class="checkmark"></span>
+                    </label>
+                `;
+
+                const header = card.querySelector('.day-header');
+                header.addEventListener('click', () => {
+                    card.classList.toggle('open');
+                });
+
+                fragment.appendChild(card);
+            });
+
+            listElement.appendChild(fragment);
+            updateActionButton(currentDay);
+
+            const activeCard = document.querySelector('.day-card.active');
+            if (activeCard && currentDay === activeCard.dataset.day * 1) { 
+                 activeCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        
+        // --- LOGIKA PRZEŁĄCZANIA WIDOKÓW ---
+
+        // Funkcja inicjująca właściwą aplikację po przełączeniu widoku
+        function initApp() {
+            // 1. Wczytanie stanu z localStorage
+            completedDays = JSON.parse(localStorage.getItem(completionKey)) || {};
+            
+            // 2. Włączenie głównego przycisku
+            completeButton.onclick = window.completeCurrentDay;
+
+            // 3. Wyrenderowanie planu
+            renderPlan();
+
+            // 4. Ujawnienie zawartości listy
+            listElement.style.opacity = '1'; 
+        }
+
+        // Funkcja do przełączania z Ekranu Głównego do Aplikacji
+        window.launchApp = function() {
+            homeScreen.style.display = 'none';
+            appScreen.style.display = 'block';
+            
+            // Lekkie opóźnienie, aby zapewnić, że wyświetlanie jest gotowe przed renderowaniem
+            setTimeout(initApp, 50); 
+        }
+
+        // Używamy DOMContentLoaded do sprawdzenia, czy stan jest już zapisany.
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sprawdzamy, czy użytkownik ma już postęp. Jeśli tak, uruchamiamy od razu aplikację.
+            completedDays = JSON.parse(localStorage.getItem(completionKey));
+            
+            if (completedDays && Object.keys(completedDays).length > 0) {
+                // Jeśli jest postęp, pomiń ekran główny
+                launchApp();
+            } else {
+                // Pokaż ekran główny
+                homeScreen.style.display = 'flex';
+                appScreen.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
