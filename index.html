@@ -3,225 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>30 Dni Koktajli</title>
+    <title>365 Dni Koktajli Sezonowych - Tracker</title>
+    <!-- Ładowanie Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* --- OGÓLNY STYL I ZMIENNE --- */
+        /* Definicje niestandardowych kolorów i stylów dla estetyki */
         :root {
-            --primary-color: #4CAF50; /* Zieleń */
-            --secondary-color: #8BC34A; /* Jasna zieleń */
-            --text-color: #333;
-            --background-color: #f7f7f7;
-            --completed-color: #E8F5E9; /* Bardzo jasna zieleń */
-            --action-color: #FF9800; /* Pomarańcz - Akcent */
-            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --color-primary: #059669; /* Emerald Green */
+            --color-secondary: #064E3B; /* Darker Emerald */
+            --color-text: #1F2937;
+            --color-bg-light: #F9FAFB;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            transition: background-color 0.3s;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg-light);
+            color: var(--color-text);
         }
 
-        /* --- STYLY EKRANU GŁÓWNEGO --- */
-        #home-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-            background: linear-gradient(135deg, var(--completed-color), var(--background-color));
-        }
-
-        .logo-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            animation: pulse 2s infinite ease-in-out;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        #home-screen h1 {
-            font-size: 32px;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        #home-screen p {
-            font-size: 18px;
-            color: var(--text-color);
-            margin-bottom: 40px;
-            max-width: 350px;
-        }
-
-        .start-button {
-            padding: 15px 40px;
-            background-color: var(--action-color);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.4);
-            transition: all 0.2s ease;
-        }
-
-        .start-button:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 5px rgba(255, 152, 0, 0.5);
-        }
-
-        /* --- STYLY EKRANU APLIKACJI (Z KOKTAJLE.HTML) --- */
-        #app-screen {
-            display: none; /* Ukryte domyślnie */
-            padding-bottom: 90px;
-        }
-
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 20px 15px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 10px;
-            position: sticky; /* Zatrzymuje nagłówek na górze */
+        /* Utrzymanie nagłówka na górze */
+        .sticky-header {
             top: 0;
-            z-index: 50;
+            z-index: 20;
         }
 
-        .app-header h1 {
-            font-size: 24px;
-            margin: 0;
-            font-weight: 600;
-        }
-
-        .container {
-            padding: 15px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* KARTY DNI */
-        .day-card {
-            background-color: white;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            padding: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            transition: background-color 0.3s ease, transform 0.2s ease;
+        /* --- Custom Checkbox (Stylizacja dla lepszej interakcji dotykowej) --- */
+        .checkbox-container {
+            display: block;
             position: relative;
-        }
-
-        /* Styl dla ukończonego dnia */
-        .day-card.completed {
-            background-color: var(--completed-color);
-            border-left: 5px solid var(--secondary-color);
-        }
-
-        /* Styl dla AKTYWNEGO dnia */
-        .day-card.active {
-            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.4);
-            border: 2px solid var(--action-color);
-            transform: scale(1.02);
-            order: -1;
-        }
-
-        .day-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             cursor: pointer;
+            width: 28px;
+            height: 28px;
         }
 
-        .day-header h2 {
-            font-size: 18px;
-            margin: 0;
-            font-weight: 500;
-            flex-grow: 1;
-        }
-
-        .day-header .day-number {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 700;
-            margin-right: 10px;
-        }
-
-        /* Szczegóły (rozwijane) */
-        .shake-details {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            padding-top: 0;
-        }
-
-        .day-card.open .shake-details {
-            max-height: 300px;
-            padding-top: 10px;
-        }
-
-        .shake-details p {
-            margin: 5px 0;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .toggle-icon {
-            font-size: 20px;
-            transform: rotate(0deg);
-            transition: transform 0.3s;
-            margin-left: 10px;
-        }
-
-        .day-card.open .toggle-icon {
-            transform: rotate(180deg);
-        }
-
-        /* Checkbox */
-        .checkbox {
+        .checkbox-container input {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 25px;
-            height: 25px;
+            opacity: 0;
             cursor: pointer;
-            z-index: 10;
+            height: 0;
+            width: 0;
         }
 
+        /* Stylizacja kwadratowego znacznika */
         .checkmark {
             position: absolute;
             top: 0;
             left: 0;
-            height: 25px;
-            width: 25px;
-            background-color: #eee;
-            border-radius: 50%;
-            transition: 0.2s;
+            height: 28px;
+            width: 28px;
+            border-radius: 8px; 
+            background-color: #E5E7EB; 
+            transition: all 0.2s;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 2px solid #D1D5DB;
         }
 
-        .day-card.completed .checkmark {
-            background-color: var(--secondary-color);
+        .checkbox-container:hover input ~ .checkmark {
+            background-color: #D1FAE5; 
         }
 
+        /* Kolor, gdy checkbox jest zaznaczony (zmieni się dynamicznie przez JS/Tailwind) */
+        .checkbox-container input:checked ~ .checkmark {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Stylizacja znacznika 'ptaszka' */
         .checkmark:after {
             content: "";
             position: absolute;
             display: none;
+        }
+
+        /* Pokaż znacznik po zaznaczeniu */
+        .checkbox-container input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        /* Stylizacja samego 'ptaszka' (biały) */
+        .checkbox-container .checkmark:after {
             left: 9px;
             top: 5px;
             width: 5px;
@@ -230,273 +91,488 @@
             border-width: 0 3px 3px 0;
             transform: rotate(45deg);
         }
-        .day-card.completed .checkmark:after {
-            display: block;
+
+        /* Karta po ukończeniu */
+        .shake-card.completed {
+            background-color: #F0FFF4; 
+            opacity: 0.85;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
-        /* PRZYCISK GŁÓWNEJ AKCJI (FIXED FOOTER) */
-        #action-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 15px;
-            box-sizing: border-box;
-            background: white;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        #complete-button {
-            width: 100%;
-            padding: 15px;
-            background-color: var(--action-color);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-
-        #complete-button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        #complete-button:active:not(:disabled) {
-            transform: scale(0.98);
+        /* Styl szczegółów (ukryte domyślnie) */
+        .shake-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+            padding: 0 1rem;
         }
         
-        /* WIZUALNA STABILIZACJA */
-        #shake-list {
-            opacity: 0;
-            transition: opacity 0.2s ease-in;
+        /* Styl szczegółów po otwarciu */
+        .shake-card.open .shake-details {
+            max-height: 200px; 
+            padding-bottom: 1rem;
+            padding-top: 0.5rem;
         }
         
+        .shake-card.today {
+            /* Dodatkowy styl dla dzisiejszego dnia */
+            border: 4px solid;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            animation: pulse-border 1.5s infinite alternate;
+        }
+
+        /* Animacja delikatnego pulsowania ramki dla dzisiejszego dnia */
+        @keyframes pulse-border {
+            0% { border-color: rgba(5, 150, 105, 0.4); }
+            100% { border-color: rgba(5, 150, 105, 1); }
+        }
     </style>
 </head>
-<body>
+<body class="selection:bg-green-200">
 
-    <!-- 1. EKRAN GŁÓWNY (POWITANIE) -->
-    <div id="home-screen">
-        <div class="logo-icon">🍹</div>
-        <h1>30 Dni Zdrowych Koktajli</h1>
-        <p>Rozpocznij swoje wyzwanie już dziś! Odkryj 30 unikalnych, pożywnych przepisów i śledź swoje postępy prosto na telefonie.</p>
-        <button class="start-button" onclick="launchApp()">Rozpocznij Wyzwanie!</button>
-    </div>
+    <div id="app" class="max-w-xl mx-auto min-h-screen">
 
-    <!-- 2. EKRAN APLIKACJI (PLAN KOKTAJLOWY) -->
-    <div id="app-screen">
-        <header class="app-header">
-            <h1>💪 30 Dni Koktajli</h1>
-            <p style="font-size: 14px; opacity: 0.8; margin-top: 5px;">Plan jest interaktywny i zapisuje Twój postęp!</p>
+        <!-- Nagłówek i Status -->
+        <header class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-6 shadow-2xl rounded-b-3xl mb-6 sticky-header">
+            <a href="index.html" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/90 hover:text-white transition duration-200 text-sm font-semibold p-2 rounded-lg">
+                ← Home
+            </a>
+            <h1 class="text-3xl font-extrabold text-center mb-1 drop-shadow-md">🌿 365 Dni Zielonej Mocy</h1>
+            <p class="text-sm text-center opacity-90 mb-4">Wyzwanie Sezonowe: Ukończ 100% kwartału!</p>
+            <div id="progress-display" class="text-center font-semibold bg-white/20 backdrop-blur-sm rounded-full py-1 text-sm shadow-inner transition duration-500">
+                Ładowanie postępu...
+            </div>
         </header>
 
-        <div class="container" id="shake-list">
-            <!-- Karty dni zostaną wygenerowane przez JavaScript -->
+        <!-- Wyzwanie Sezonowe -->
+        <div id="challenge-display" class="bg-white mx-4 p-4 rounded-xl shadow-lg border-t-4 border-emerald-500 mb-6 transition-all duration-300">
+             <!-- Treść zostanie załadowana dynamicznie -->
+        </div>
+        
+        <!-- Przycisk Resetowania Danych -->
+        <div class="px-4 mb-4">
+            <button onclick="confirmReset()" class="w-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 p-2 text-sm font-medium rounded-lg shadow-sm">
+                Resetuj wszystkie postępy
+            </button>
         </div>
 
-        <!-- Pasek z przyciskiem akcji -->
-        <div id="action-bar">
-            <button id="complete-button" disabled>Ładowanie...</button>
+
+        <!-- Przyciski Kwartałów (Tabs) -->
+        <div id="quarter-buttons" class="flex justify-between space-x-2 px-4 mb-6">
+            <!-- Przyciski zostaną wygenerowane dynamicznie przez JS -->
+        </div>
+        
+        <p id="filter-status" class="text-center text-sm font-medium text-gray-500 mb-4 transition-opacity duration-300">
+            Pokaż wszystkie 365 dni.
+        </p>
+
+        <!-- Kontener dla listy Koktajli -->
+        <div class="px-4 pb-12" id="shake-list">
+            <!-- Lista koktajli zostanie wygenerowana dynamicznie przez JS -->
+        </div>
+
+    </div>
+
+    <!-- Niestandardowy Modal (Zastępuje alert/confirm) -->
+    <div id="custom-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onclick="closeModal()">
+        <div class="bg-white rounded-xl p-6 shadow-2xl max-w-sm w-full transform transition-all duration-300 scale-95" onclick="event.stopPropagation()">
+            <h3 id="modal-title" class="text-xl font-bold mb-3 text-gray-800">Potwierdź Akcję</h3>
+            <p id="modal-message" class="text-gray-600 mb-6">Czy na pewno chcesz zresetować wszystkie postępy? Ta akcja jest nieodwracalna.</p>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors">Anuluj</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors">Potwierdź</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // DANE PLANU DIETY (W JĘZYKU POLSKIM)
-        const shakePlan = [
-            { day: 1, name: "Podstawowa Zielenina", ingredients: "Szpinak, Banan, Mleko Migdałowe, Nasiona Chia (omega-3, błonnik)." },
-            { day: 2, name: "Jagodowa Bomba Antyoksydacyjna", ingredients: "Mieszanka Jagód (antyoksydanty), Jogurt Grecki (białko), Woda, Miód (opcjonalnie)." },
-            { day: 3, name: "Tropikalna Odporność", ingredients: "Mango, Ananas (Witamina C), Woda Kokosowa (elektrolity), Imbir." },
-            { day: 4, name: "Orzechowy Power", ingredients: "Masło Orzechowe (białko, zdrowe tłuszcze), Banan, Płatki Owsiane (błonnik), Mleko." },
-            { day: 5, name: "Kremowa Rozkosz z Awokado", ingredients: "Awokado (zdrowe tłuszcze), Szpinak, Jabłko, Woda/Lód." },
-            { day: 6, name: "Czekoladowa Regeneracja", ingredients: "Mrożone Wiśnie (przeciwzapalne), Kakao Naturalne, Odżywka Białkowa (opcjonalnie), Woda." },
-            { day: 7, name: "Energia z Chia", ingredients: "Mleko Migdałowe, Banan, Cynamon, 2 łyżki Nasion Chia (namoczone)." },
-            // Tydzień 2: Błonnik
-            { day: 8, name: "Pomarańczowy Blask Marchewki", ingredients: "Marchew, Pomarańcza (Witaminy A i C), Imbir, Siemię Lniane (błonnik)." },
-            { day: 9, name: "Daktyle i Orzechy Włoskie", ingredients: "Namoczone Daktyle, Orzechy Włoskie (omega-3), Mleko, Ekstrakt Waniliowy." },
-            { day: 10, name: "Probiotyczny Kefir", ingredients: "Kefir (probiotyki), Borówki, Banan, Woda." },
-            { day: 11, name: "Owsiany Koktajl Śniadaniowy", ingredients: "Płatki Owsiane, Odżywka Białkowa, Cynamon, Woda/Mleko." },
-            { day: 12, name: "Brzoskwinia-Imbir Błonnik", ingredients: "Mrożone Brzoskwinie, Jogurt Grecki, Mielony Imbir, Łuska Babki Jajowatej (opcjonalnie)." },
-            { day: 13, name: "Czerwony Burak Detoks", ingredients: "Ugotowany Burak, Jabłko, Sok z Cytryny, Woda." },
-            { day: 14, name: "Konopne Kompletne", ingredients: "Nasiona Konopi (białko), Jarmuż, Banan, Mleko/Woda." },
-            // Tydzień 3: Mózg i Tłuszcze
-            { day: 15, name: "Masło Migdałowe Bliss", ingredients: "Masło Migdałowe (Witamina E), Banan, Kakao ziarna, Mleko Migdałowe." },
-            { day: 16, name: "Szpinakowo-Gruszkowa Zielenina", ingredients: "Gruszka (błonnik), Szpinak, 1 łyżka Oleju Kokosowego (MCT/zdrowe tłuszcze), Woda." },
-            { day: 17, name: "Kurkuma Przeciwzapalna", ingredients: "Mrożone Mango, Kurkuma w Proszku, Czarny Pieprz, Mleko Kokosowe." },
-            { day: 18, name: "Twarożek Kremowy", ingredients: "Serek Wiejski (białko), Ananas, Woda/Lód." },
-            { day: 19, name: "Mieszanka Nasion", ingredients: "Banan, Szpinak, Pestki Dyni, Nasiona Słonecznika (minerały)." },
-            { day: 20, name: "Masło Orzechowe Power", ingredients: "Orzechy Nerkowca/Masło Nerkowcowe, Syrop Klonowy (opcjonalnie), Mleko, Lód." },
-            { day: 21, name: "Espresso Kickstart", ingredients: "Kawa Parzona na Zimno, Banan, Odżywka Białkowa, Lód, Mleko." },
-            // Tydzień 4: Superfoods
-            { day: 22, name: "Arbuzowy Nawadniacz", ingredients: "Arbuz (nawodnienie, likopen), Sok z Limonki, Mięta." },
-            { day: 23, name: "Papaja na Trawienie", ingredients: "Papaja (enzymy trawienne), Banan, Woda, Miód (opcjonalnie)." },
-            { day: 24, name: "Spirulina na Minerały", ingredients: "Banan, Ananas, Szpinak, 1 łyżeczka Spiruliny w Proszku, Woda." },
-            { day: 25, name: "Koktajl Słodki Ziemniak", ingredients: "Ugotowany Batat, Cynamon, Gałka Muszkatołowa, Mleko." },
-            { day: 26, name: "Tofu na Białko", ingredients: "Silken Tofu (białko), Jagody, Ekstrakt Waniliowy, Woda/Mleko." },
-            { day: 27, name: "Kiwi Witamina C", ingredients: "Kiwi (Witamina C), Zielone Winogrona, Szpinak, Woda." },
-            { day: 28, name: "Smoothie Czarny Las", ingredients: "Jeżyny, Kakao Naturalne, Jogurt Grecki, Mleko Migdałowe." },
-            // Koniec
-            { day: 29, name: "Ulubiony Restart", ingredients: "Wybierz swój ulubiony koktajl z dni 1-28. Ciesz się!" },
-            { day: 30, name: "Zbilansowany Pełny Koktajl", ingredients: "Szpinak, Banan, 1 łyżka Siemię Lniane, 1 łyżka Odżywka Białkowa, 1 łyżka Masło Orzechowe, Woda/Mleko." }
+        // --- Dane Planu Koktajlowego (365 Dni, 4 Kwartały) ---
+
+        // Kwartał 1: ZIMA (Listopad - Styczeń) - Cel: Wzmocnienie
+        const ZIMA = [
+            { name: "Zimowy Wojownik (Imbir/Kurkuma)", ingredients: "Mrożone Mango, Kurkuma, Imbir, Czarny Pieprz, Mleko Owiane.", focus: "Odporność" },
+            { name: "Cytrusowa Tarcza (Witamina C)", ingredients: "Pomarańcza, Mandarynka, 1/2 Banana, Siemię Lniane, Woda.", focus: "Odporność" },
+            { name: "Zielone Paliwo (Antyoksydanty)", ingredients: "Mrożony Jarmuż/Szpinak, Jabłko, Cynamon, Nasiona Chia, Woda.", focus: "Wzmocnienie" },
+            { name: "Rozgrzewający Owsiany", ingredients: "Płatki Owsiane (namoczone), Masło Orzechowe, Banan, Mleko, Szczypta Kakao.", focus: "Energia" },
+            { name: "Czerwona Siła Buraka", ingredients: "Ugotowany Burak, Jabłko, Mrożone Wiśnie, Imbir, Sok z Cytryny.", focus: "Detoks" },
+            { name: "Bomba Białkowa z Nasion", ingredients: "Szpinak, Mleko Migdałowe, Odżywka Białkowa (lub Tofu), Pestki Dyni, 1/2 Gruszki.", focus: "Białko" },
+            { name: "Jagodowy Power (Mrożone)", ingredients: "Mieszanka Mrożonych Jagód, Jogurt Naturalny, Miód, Woda.", focus: "Antyoksydanty" },
+            { name: "Kawa na Czyste Myślenie", ingredients: "Kawa Parzona na Zimno, Mleko Kokosowe, Cynamon, 1 Łyżeczka Oleju MCT.", focus: "Focus" },
+            { name: "Miodowo-Czosnkowy (Naturalny Antybiotyk)", ingredients: "Banan, Miód, Woda, 1/4 Ząbka Czosnku (opcjonalnie!), Pomarańcza.", focus: "Odporność" },
+            { name: "Koktajl z Płatkami Żytnimi", ingredients: "Płatki Żytnie, Siemię Lniane, Mleko Ryżowe, Jabłko, Cynamon.", focus: "Błonnik" },
+            { name: "Kremowy Banan i Kakao", ingredients: "Banan, Kakao Naturalne, Mleko Owiane, 1 Łyżeczka Masła Migdałowego.", focus: "Uspokojenie" },
+            { name: "Koktajl z Kiszoną Kapustą (Probiotyki)", ingredients: "Mała ilość soku z Kiszonej Kapusty, Ogórek, Jabłko, Szpinak, Woda.", focus: "Jelita" },
+            { name: "Mrożona Gruszka i Kardamon", ingredients: "Mrożona Gruszka, Kardamon, Mleko Migdałowe, 1/2 Banana.", focus: "Rozgrzewanie" },
+            { name: "Wybór Tygodnia (Dzień Wolny)", ingredients: "Wybierz dowolny ulubiony koktajl z kwartału 1.", focus: "Regeneracja" },
+        ]; // 14 unikalnych
+
+        // Kwartał 2: WIOSNA (Luty - Kwiecień) - Cel: Oczyszczanie
+        const WIOSNA = [
+            { name: "Zielony Detoks (Chlorofil)", ingredients: "Świeży Ogórek, Młody Szpinak, Kiwi, Sok z Limonki, Woda Kokosowa.", focus: "Detoks" },
+            { name: "Wiosenna Odnowa z Pokrzywą", ingredients: "Świeża lub Mrożona Pokrzywa, Jabłko, Banan, Siemię Lniane.", focus: "Oczyszczanie" },
+            { name: "Błonnikowa Moc Chia i Kiełków", ingredients: "Mleko Migdałowe, Banan, Nasiona Chia, Łyżka Kiełków Brokuła.", focus: "Błonnik" },
+            { name: "Grejpfrutowy Spalacz Tłuszczu", ingredients: "Grejpfrut, Pomarańcza, Odrobina Imbiru, Liście Mięty.", focus: "Metabolizm" },
+            { name: "Kremowy Oddech Awokado", ingredients: "Awokado (zdrowe tłuszcze), Jarmuż, Brzoskwinia (mrożona), Woda.", focus: "Zdrowe Tłuszcze" },
+            { name: "Rzodkiewka i Kefir (Probiotyk)", ingredients: "Kefir Naturalny, Kilka Listków Rzodkiewki, Ogórek, Szpinak.", focus: "Probiotyki" },
+            { name: "Marchewkowo-Selerowy Cleanser", ingredients: "Marchew (sok), Seler Naciowy, Jabłko, Szczypta Pieprzu Cayenne.", focus: "Oczyszczanie" },
+            { name: "Kompletny Aminokwasowy", ingredients: "Mleko Owiane, Odżywka Konopna/Grochowa, Zielone Warzywa, Syrop Klonowy.", focus: "Białko" },
+            { name: "Szparagi i Gruszka (Moczopędny)", ingredients: "3-4 gotowane Szparagi, Gruszka, Szpinak, Woda.", focus: "Detoks Wody" },
+            { name: "Koktajl z Płatkami Jęczmiennymi", ingredients: "Płatki Jęczmienne, Mleko Ryżowe, Jabłko, Migdały.", focus: "Błonnik" },
+            { name: "Ananas i Liście Mięty", ingredients: "Ananas (bromelaina), Liście Mięty, Woda Kokosowa.", focus: "Trawienie" },
+            { name: "Czerwony Detoks (Maliny i Czerwona Kapusta)", ingredients: "Maliny, 1/4 Czerwonej Kapusty, Jabłko, Woda.", focus: "Antyoksydanty" },
+            { name: "Zielony Energetyk z Bananem", ingredients: "Duży Banan, Mrożony Jarmuż, Mleko Migdałowe, Odżywka Białkowa.", focus: "Energia" },
+            { name: "Wybór Tygodnia (Dzień Wolny)", ingredients: "Wybierz dowolny ulubiony koktajl z kwartału 2.", focus: "Regeneracja" },
+        ]; // 14 unikalnych
+
+        // Kwartał 3: LATO (Maj - Lipiec) - Cel: Nawodnienie
+        const LATO = [
+            { name: "Arbuzowy Elektrolit (Likopen)", ingredients: "Dużo Arbuza, Woda Kokosowa, Świeża Mięta, Sok z Limonki.", focus: "Nawodnienie" },
+            { name: "Ogórkowo-Pomidorowy Chłód", ingredients: "Pomidor (likopen), Ogórek, Szpinak, Odrobina Bazylii, Lód.", focus: "Nawodnienie" },
+            { name: "Truskawkowa Moc Antyoksydacyjna", ingredients: "Świeże Truskawki, Maliny, Jogurt Grecki, Woda.", focus: "Antyoksydanty" },
+            { name: "Melon z Imbirem (Trawienie)", ingredients: "Melon Galia lub Kantalupa, Imbir, Kefir.", focus: "Trawienie" },
+            { name: "Letnia Witamina C (Czarna Porzeczka)", ingredients: "Czarna Porzeczka (świeża/mrożona), Banan, Liście Jarmużu, Woda.", focus: "Odporność" },
+            { name: "Koktajl z Papai (Enzymy)", ingredients: "Papaja (enzymy trawienne), Ananas, Mięta, Woda.", focus: "Enzymy" },
+            { name: "Kremowy Kokosowy Raj", ingredients: "Mleko Kokosowe (tłuszcze MCT), 1/2 Banana, Mango (mrożone), Lód.", focus: "Energia" },
+            { name: "Kiwi i Winogrona (Ochrona DNA)", ingredients: "Kiwi, Zielone Winogrona, Liście Szpinaku, Woda.", focus: "Antyoksydanty" },
+            { name: "Morelowy Beta-Karoten", ingredients: "Świeże Morele, Marchewka, Sok Pomarańczowy, 1/2 Banana.", focus: "Skóra" },
+            { name: "Cukinia i Bazylia (Lekkostrawny)", ingredients: "Cukinia (ugotowana lub surowa), Bazylia, Jogurt Naturalny, 1/2 Brzoskwini.", focus: "Lekkostrawny" },
+            { name: "Ogórkowo-Koperkowy Chłodnik", ingredients: "Ogórek, Koperek, Kefir/Jogurt, 1/2 Jabłka.", focus: "Chłodzenie" },
+            { name: "Brzoskwiniowy Probiotyk", ingredients: "Brzoskwinia, Jogurt naturalny, Nasiona Chia, Woda.", focus: "Jelita" },
+            { name: "Moc Witamin z Kalarepy", ingredients: "Kalarepa, Zielone Jabłko, Szpinak, Sok z Limonki.", focus: "Witaminy" },
+            { name: "Wybór Tygodnia (Dzień Wolny)", ingredients: "Wybierz dowolny ulubiony koktajl z kwartału 3.", focus: "Regeneracja" },
+        ]; // 14 unikalnych
+
+        // Kwartał 4: JESIEŃ (Sierpień - Październik) - Cel: Stabilizacja
+        const JESIEN = [
+            { name: "Pumpkin Spice Protein", ingredients: "Puree z Dyni (ugotowanej), Cynamon, Gałka Muszkatołowa, Mleko, Odżywka Białkowa.", focus: "Białko/Włókno" },
+            { name: "Jabłkowo-Gruszkowa Witalność", ingredients: "Jabłko, Gruszka, Płatki Owsiane, Jogurt Naturalny, Imbir.", focus: "Błonnik" },
+            { name: "Orzechowa Moc z Datami", ingredients: "Daktyle, Masło Orzechowe, Szpinak, Mleko, Cynamon.", focus: "Energia" },
+            { name: "Żurawina na Układ Moczowy", ingredients: "Żurawina (świeża/mrożona), Banan, Sok z Pomarańczy, Woda.", focus: "Zdrowie Moczowe" },
+            { name: "Batat Kremowy (Węglowodany)", ingredients: "Ugotowany Batat, Mleko, Cynamon, Ekstrakt Waniliowy.", focus: "Węglowodany" },
+            { name: "Czekolada i Orzechy Włoskie (Mózg)", ingredients: "Kakao Naturalne, Orzechy Włoskie, Banan, Mleko Migdałowe.", focus: "Omega-3" },
+            { name: "Ostatni Jarmuż Sezonu", ingredients: "Jarmuż, Winogrona, Awokado, Siemię Lniane.", focus: "Detoks" },
+            { name: "Seler Naciowy i Gorzkie Grejpfruty", ingredients: "Seler Naciowy, Grejpfrut, Woda, 1/2 Jabłka.", focus: "Trawienie" },
+            { name: "Granat i Kokos (Antyoksydanty)", ingredients: "Pestki Granatu, Mleko Kokosowe, 1/2 Banana.", focus: "Antyoksydanty" },
+            { name: "Koktajl z Płatkami Owsianymi (Sytość)", ingredients: "Płatki Owsiane, Woda, Masło Orzechowe, 1/2 Banana, Odżywka Białkowa.", focus: "Sytość" },
+            { name: "Korzeń Pietruszki i Jabłko", ingredients: "Ugotowany Korzeń Pietruszki, Jabłko, Sok z Cytryny, Imbir.", focus: "Wzmocnienie" },
+            { name: "Kremowy Ser Twarogowy i Śliwka", ingredients: "Ser Twarogowy (białko), Śliwki (mrożone), Mleko, Cynamon.", focus: "Białko" },
+            { name: "Nasiona Słonecznika i Płatki", ingredients: "Nasiona Słonecznika (namoczone), Płatki Owsiane, 1/2 Gruszki, Mleko.", focus: "Tłuszcze" },
+            { name: "Wybór Tygodnia (Dzień Wolny)", ingredients: "Wybierz dowolny ulubiony koktajl z kwartału 4.", focus: "Regeneracja" },
+        ]; // 14 unikalnych
+
+        const QUARTERS = [
+            { id: 'ZIMA', name: 'ZIMA (Listopad - Styczeń)', days: 91, recipes: ZIMA, color: 'bg-indigo-600', border: 'border-indigo-600', challenge: 'Cel: Wzmocnienie Odporności (Min. 80% koktajli z Imbirem/Kurkumą/Wit. C)' },
+            { id: 'WIOSNA', name: 'WIOSNA (Luty - Kwiecień)', days: 91, recipes: WIOSNA, color: 'bg-lime-600', border: 'border-lime-600', challenge: 'Cel: Wiosenne Oczyszczanie (Min. 70% dni Zielony Detoks)' },
+            { id: 'LATO', name: 'LATO (Maj - Lipiec)', days: 91, recipes: LATO, color: 'bg-sky-500', border: 'border-sky-500', challenge: 'Cel: Nawodnienie i Energia (Codziennie sprawdzaj kolor moczu!)' },
+            { id: 'JESIEN', name: 'JESIEN (Sierpień - Październik)', days: 92, recipes: JESIEN, color: 'bg-amber-600', border: 'border-amber-600', challenge: 'Cel: Stabilizacja i Magazynowanie (Skup się na zdrowych tłuszczach i błonniku)' },
         ];
-
-        let completedDays = {};
-        const completionKey = 'shakePlanCompletion';
         
-        // Elementy DOM
-        const homeScreen = document.getElementById('home-screen');
-        const appScreen = document.getElementById('app-screen');
-        const listElement = document.getElementById('shake-list');
-        const completeButton = document.getElementById('complete-button');
+        // Tablica wszystkich klas ramki, aby je później usunąć
+        const ALL_BORDER_CLASSES = QUARTERS.map(q => q.border);
 
 
-        // --- LOGIKA APLIKACJI KOKTAJLOWEJ ---
+        // --- Generowanie Całego Planu (365 Dni) ---
+        const SHAKE_PLAN = [];
+        let dayCounter = 1;
 
-        function findCurrentDay() {
-            for (let i = 1; i <= shakePlan.length; i++) {
-                if (!completedDays[i]) {
-                    return i;
+        QUARTERS.forEach(quarter => {
+            for (let i = 0; i < quarter.days; i++) {
+                const cycleIndex = i % quarter.recipes.length;
+                const recipe = quarter.recipes[cycleIndex];
+                SHAKE_PLAN.push({
+                    day: dayCounter,
+                    quarter: quarter.id,
+                    quarterName: quarter.name,
+                    recipeName: recipe.name,
+                    ingredients: recipe.ingredients,
+                    focus: recipe.focus,
+                    cycleDay: cycleIndex + 1,
+                    cardBorder: quarter.border,
+                    cardColorClass: quarter.color, // Zachowaj klasę koloru
+                });
+                dayCounter++;
+            }
+        });
+
+        // --- Zarządzanie Stanem Lokalnym ---
+        const COMPLETION_KEY = 'shake365_completed_days_v2'; // Użycie nowej wersji klucza
+        let completedDays = {}; 
+        let currentFilterId = 'ALL'; // 'ALL' lub 'ZIMA', 'WIOSNA', 'LATO', 'JESIEN'
+
+        function loadProgress() {
+            const storedProgress = localStorage.getItem(COMPLETION_KEY);
+            if (storedProgress) {
+                try {
+                    completedDays = JSON.parse(storedProgress);
+                } catch (e) {
+                    console.error("Błąd parsowania localStorage:", e);
+                    completedDays = {};
                 }
             }
-            return shakePlan.length + 1;
         }
 
-        function updateActionButton(currentDay) {
-            if (currentDay > shakePlan.length) {
-                completeButton.textContent = "🥳 PLAN UKOŃCZONY!";
-                completeButton.disabled = true;
-            } else {
-                const shakeName = shakePlan.find(item => item.day === currentDay).name;
-                completeButton.textContent = `Ukończ DZIEŃ ${currentDay}: ${shakeName}`;
-                completeButton.disabled = false;
-            }
+        function saveProgress() {
+            localStorage.setItem(COMPLETION_KEY, JSON.stringify(completedDays));
         }
 
-        window.completeCurrentDay = function() {
-            const currentDay = findCurrentDay();
+        // --- Funkcje Daty i Dnia Roku ---
+        
+        function getDayOfYear(date) {
+            const start = new Date(date.getFullYear(), 0, 0);
+            const diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
+            const oneDay = 1000 * 60 * 60 * 24;
+            return Math.floor(diff / oneDay);
+        }
 
-            if (currentDay <= shakePlan.length) {
-                completedDays[currentDay] = true;
-                localStorage.setItem(completionKey, JSON.stringify(completedDays));
+        function getTodayShakeDay() {
+            // Zwraca numer dnia w roku, który odpowiada pozycji w tablicy SHAKE_PLAN (1-365)
+            return getDayOfYear(new Date());
+        }
 
-                const nextDay = currentDay + 1;
-                if (nextDay <= shakePlan.length) {
-                    setTimeout(() => {
-                        const nextCard = document.querySelector(`.day-card[data-day="${nextDay}"]`);
-                        if (nextCard) {
-                            nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
-                    }, 50);
-                }
-                
-                renderPlan();
-            }
+        function getQuarterFromDay(dayNumber) {
+            if (dayNumber >= 1 && dayNumber <= 91) return 'ZIMA';
+            if (dayNumber >= 92 && dayNumber <= 182) return 'WIOSNA';
+            if (dayNumber >= 183 && dayNumber <= 273) return 'LATO';
+            return 'JESIEN';
+        }
+        
+        // --- Funkcje UI i Logika ---
+
+        window.setCurrentFilter = (filterId) => {
+            currentFilterId = filterId;
+            renderPlan(false); // Nie przewijaj przy zmianie filtra
         }
 
         window.toggleCompletion = function(day, event) {
-            if (event) event.stopPropagation();
+            event.stopPropagation();
 
-            if (completedDays[day]) {
-                delete completedDays[day];
+            const dayKey = String(day);
+
+            if (completedDays[dayKey]) {
+                delete completedDays[dayKey];
             } else {
-                completedDays[day] = true;
+                completedDays[dayKey] = true;
             }
 
-            localStorage.setItem(completionKey, JSON.stringify(completedDays));
-            renderPlan();
-        }
-
-        function renderPlan() {
-            listElement.innerHTML = '';
-            const currentDay = findCurrentDay();
-            const fragment = document.createDocumentFragment();
-
-            shakePlan.forEach(item => {
-                const isCompleted = completedDays[item.day] === true;
-                const isActive = item.day === currentDay;
-
-                const card = document.createElement('div');
-                card.className = `day-card ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`;
-                card.dataset.day = item.day;
-
-                card.innerHTML = `
-                    <div class="day-header" tabindex="0">
-                        <h2>
-                            <span class="day-number">DZIEŃ ${item.day}</span> ${item.name}
-                            ${isActive ? '<span style="color: var(--action-color); font-size: 14px; margin-left: 10px;">(DZIŚ)</span>' : ''}
-                        </h2>
-                        <div style="display: flex; align-items: center;">
-                            <span class="toggle-icon">▼</span>
-                        </div>
-                    </div>
-                    <div class="shake-details">
-                        <p><strong>Składniki:</strong> ${item.ingredients}</p>
-                    </div>
-                    <label class="checkbox" onclick="toggleCompletion(${item.day}, event)">
-                        <span class="checkmark"></span>
-                    </label>
-                `;
-
-                const header = card.querySelector('.day-header');
-                header.addEventListener('click', () => {
-                    card.classList.toggle('open');
-                });
-
-                fragment.appendChild(card);
-            });
-
-            listElement.appendChild(fragment);
-            updateActionButton(currentDay);
-
-            const activeCard = document.querySelector('.day-card.active');
-            if (activeCard && currentDay === activeCard.dataset.day * 1) { 
-                 activeCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            saveProgress();
+            renderPlan(false); // Nie przewijaj przy kliknięciu
         }
         
-        // --- LOGIKA PRZEŁĄCZANIA WIDOKÓW ---
+        // --- Modal Funkcje (Bez alert/confirm) ---
 
-        // Funkcja inicjująca właściwą aplikację po przełączeniu widoku
-        function initApp() {
-            // 1. Wczytanie stanu z localStorage
-            completedDays = JSON.parse(localStorage.getItem(completionKey)) || {};
-            
-            // 2. Włączenie głównego przycisku
-            completeButton.onclick = window.completeCurrentDay;
+        const modal = document.getElementById('custom-modal');
+        const modalConfirmBtn = document.getElementById('modal-confirm-btn');
 
-            // 3. Wyrenderowanie planu
-            renderPlan();
-
-            // 4. Ujawnienie zawartości listy
-            listElement.style.opacity = '1'; 
+        window.closeModal = function() {
+            modal.classList.add('hidden');
+            modalConfirmBtn.onclick = null; 
         }
 
-        // Funkcja do przełączania z Ekranu Głównego do Aplikacji
-        window.launchApp = function() {
-            homeScreen.style.display = 'none';
-            appScreen.style.display = 'block';
+        window.confirmReset = function() {
+            document.getElementById('modal-title').textContent = "Potwierdź Reset";
+            document.getElementById('modal-message').textContent = "Czy na pewno chcesz zresetować postępy wszystkich 365 dni? Dane ZOSTANĄ trwale usunięte z Twojej przeglądarki.";
             
-            // Lekkie opóźnienie, aby zapewnić, że wyświetlanie jest gotowe przed renderowaniem
-            setTimeout(initApp, 50); 
+            modalConfirmBtn.textContent = "Resetuj";
+            modalConfirmBtn.className = 'px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors';
+            
+            modalConfirmBtn.onclick = function() {
+                resetProgress();
+                closeModal();
+            };
+
+            modal.classList.remove('hidden');
         }
 
-        // Używamy DOMContentLoaded do sprawdzenia, czy stan jest już zapisany.
-        document.addEventListener('DOMContentLoaded', () => {
-            // Sprawdzamy, czy użytkownik ma już postęp. Jeśli tak, uruchamiamy od razu aplikację.
-            completedDays = JSON.parse(localStorage.getItem(completionKey));
+        function resetProgress() {
+            completedDays = {};
+            saveProgress();
+            renderPlan(true); // Odśwież i przewiń na dzisiaj po resecie
+        }
+        
+        function updateProgressDisplay() {
+            const totalDays = SHAKE_PLAN.length;
+            const completedCount = Object.keys(completedDays).length;
+            const percentage = totalDays > 0 ? ((completedCount / totalDays) * 100).toFixed(1) : 0;
             
-            if (completedDays && Object.keys(completedDays).length > 0) {
-                // Jeśli jest postęp, pomiń ekran główny
-                launchApp();
+            const progressEl = document.getElementById('progress-display');
+            progressEl.innerHTML = `Ukończone: <span class="text-white font-bold">${completedCount}</span> z ${totalDays} dni | Postęp Ogólny: <span class="text-white font-bold">${percentage}%</span>`;
+        }
+        
+        function updateQuarterChallenge() {
+            const quarterId = currentFilterId !== 'ALL' ? currentFilterId : getQuarterFromDay(getTodayShakeDay());
+            const quarterData = QUARTERS.find(q => q.id === quarterId);
+            
+            if (!quarterData) return;
+            
+            const totalQuarterDays = quarterData.days;
+            
+            // Liczenie ukończonych dni w danym kwartale
+            const completedInQuarter = SHAKE_PLAN.filter(item => 
+                item.quarter === quarterId && completedDays[String(item.day)]
+            ).length;
+            
+            const quarterPercentage = (completedInQuarter / totalQuarterDays) * 100;
+            const percentageText = quarterPercentage.toFixed(1) + '%';
+            
+            const isCompleted = quarterPercentage >= 100;
+
+            const challengeHtml = `
+                <p class="text-xs font-semibold uppercase text-gray-500 mb-2">Aktualne Wyzwanie: ${quarterData.name}</p>
+                <h3 class="text-lg font-bold text-gray-800 mb-3">${quarterData.challenge}</h3>
+                
+                <div class="flex justify-between items-center text-sm font-medium mb-1">
+                    <span class="${isCompleted ? 'text-green-600 font-bold' : 'text-gray-700'}">${isCompleted ? '⭐ CEL OSIĄGNIĘTY!' : 'Postęp Kwartału: ' + percentageText}</span>
+                    <span class="text-gray-500">${completedInQuarter}/${totalQuarterDays} dni</span>
+                </div>
+
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="${isCompleted ? 'bg-green-600' : quarterData.color} h-3 rounded-full transition-all duration-700 ease-out" style="width: ${percentageText}"></div>
+                </div>
+            `;
+            
+            document.getElementById('challenge-display').innerHTML = challengeHtml;
+            
+            // NAPRAWIONY BŁĄD: Użycie operatora spread do poprawnego usunięcia wielu klas
+            document.getElementById('challenge-display').classList.remove(...ALL_BORDER_CLASSES);
+            document.getElementById('challenge-display').classList.add(quarterData.border);
+        }
+
+        // Główna funkcja renderująca plan
+        function renderPlan(scrollToToday = false) {
+            const listElement = document.getElementById('shake-list');
+            const quarterButtonsContainer = document.getElementById('quarter-buttons');
+            const todayShakeDay = getTodayShakeDay();
+            listElement.innerHTML = '';
+            quarterButtonsContainer.innerHTML = '';
+            
+            // 1. Zaktualizuj stan filtra
+            const filterStatusEl = document.getElementById('filter-status');
+            if (currentFilterId === 'ALL') {
+                filterStatusEl.textContent = `Pokaż wszystkie ${SHAKE_PLAN.length} dni.`;
             } else {
-                // Pokaż ekran główny
-                homeScreen.style.display = 'flex';
-                appScreen.style.display = 'none';
+                const quarterName = QUARTERS.find(q => q.id === currentFilterId).name;
+                filterStatusEl.textContent = `Filtrowanie: ${quarterName}`;
             }
-        });
+
+            // 2. Renderowanie przycisków kwartałów + przycisk "Wszystkie"
+            
+            // Przycisk "Wszystkie"
+            const allButton = document.createElement('button');
+            allButton.textContent = 'Wszystkie';
+            allButton.className = `flex-1 p-3 rounded-xl text-sm font-bold transition duration-200 shadow-md transform hover:scale-[1.03] ${
+                currentFilterId === 'ALL' ? 'bg-emerald-600 text-white ring-2 ring-offset-2 ring-emerald-500 ring-opacity-50' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`;
+            allButton.onclick = () => setCurrentFilter('ALL');
+            quarterButtonsContainer.appendChild(allButton);
+            
+            // Przyciski kwartałów
+            QUARTERS.forEach(q => {
+                const isActive = q.id === currentFilterId;
+                const button = document.createElement('button');
+                button.textContent = q.name.split(' ')[0];
+                button.className = `flex-1 p-3 rounded-xl text-sm font-bold transition duration-200 shadow-md transform hover:scale-[1.03] ${
+                    isActive ? `${q.color} text-white ring-2 ring-offset-2 ring-emerald-500 ring-opacity-50` : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`;
+                button.onclick = () => setCurrentFilter(q.id);
+                quarterButtonsContainer.appendChild(button);
+            });
+            
+            updateProgressDisplay();
+            updateQuarterChallenge();
+
+
+            // 3. Filtrowanie i renderowanie koktajli
+            let filteredPlan = SHAKE_PLAN;
+            if (currentFilterId !== 'ALL') {
+                filteredPlan = SHAKE_PLAN.filter(item => item.quarter === currentFilterId);
+            }
+            
+            let elementToScrollTo = null;
+
+            filteredPlan.forEach(item => {
+                const isCompleted = !!completedDays[String(item.day)];
+                const isToday = item.day === todayShakeDay;
+                
+                const card = document.createElement('div');
+                card.id = `day-card-${item.day}`;
+                
+                // Ustawienie klas dla karty
+                let cardClasses = `shake-card bg-white rounded-xl overflow-hidden transition-all duration-300 mb-4 shadow-md cursor-pointer border-l-4 border-opacity-0 hover:shadow-xl`;
+                
+                // Klasy dla dzisiejszego dnia
+                if (isToday) {
+                    cardClasses = `${cardClasses} today border-l-0 ${item.cardBorder}`;
+                } else if (isCompleted) {
+                     // Ukończone dni
+                    cardClasses = `${cardClasses} completed border-l-4 border-opacity-70 ${item.cardBorder.replace('border-', 'border-l-')}`;
+                } else {
+                    // Normalne dni, dodaj klasę do hovera
+                    cardClasses = `${cardClasses} hover:border-l-4 hover:border-opacity-100 ${item.cardBorder.replace('border-', 'hover:border-')}`;
+                }
+
+                // Domyślnie otwórz dzisiejszy koktajl
+                const isInitiallyOpen = isToday || (isCompleted && currentFilterId !== 'ALL');
+                if (isInitiallyOpen) {
+                    cardClasses += ' open';
+                    elementToScrollTo = card;
+                }
+                
+                card.className = cardClasses;
+
+                card.innerHTML = `
+                    <div class="day-header flex justify-between items-center p-4">
+                        <!-- Główna zawartość -->
+                        <div class="flex-1 min-w-0 pr-4" onclick="this.closest('.shake-card').classList.toggle('open')">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-xs font-mono text-gray-500 leading-none">${item.quarterName.split('(')[0].trim()} | Dzień ${item.day}</span>
+                                ${isToday ? '<span class="px-2 py-0.5 text-xs font-bold rounded-full bg-emerald-500 text-white shadow-md">DZIŚ</span>' : ''}
+                                <span class="px-2 py-0.5 text-xs font-semibold rounded-full text-white ${item.cardColorClass}">${item.focus}</span>
+                            </div>
+                            <h2 class="text-lg font-extrabold text-gray-800 leading-tight">${item.recipeName}</h2>
+                        </div>
+                        
+                        <!-- Checkbox -->
+                        <div class="flex-shrink-0">
+                             <label class="checkbox-container">
+                                <input type="checkbox" ${isCompleted ? 'checked' : ''} onclick="window.toggleCompletion(${item.day}, event)">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Szczegóły - domyślnie ukryte -->
+                    <div class="shake-details border-t border-gray-100">
+                        <p class="text-sm text-gray-600">
+                            <strong class="font-semibold text-gray-700">Składniki:</strong> ${item.ingredients}
+                        </p>
+                    </div>
+                `;
+
+                listElement.appendChild(card);
+            });
+            
+            // 4. Przewijanie do aktualnego dnia
+            if (scrollToToday && elementToScrollTo) {
+                 // Użyj timeout, aby dać czas na wyrenderowanie listy w DOM
+                setTimeout(() => {
+                    elementToScrollTo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        }
+
+        // --- Inicjalizacja Aplikacji ---
+        window.onload = function() {
+            loadProgress();
+            
+            // Ustawienie początkowego kwartału na podstawie dzisiejszego dnia
+            const todayShakeDay = getTodayShakeDay();
+            const initialQuarter = getQuarterFromDay(todayShakeDay);
+            currentFilterId = initialQuarter; // Ustaw domyślny filtr na kwartał dzisiejszego dnia
+            
+            // Uruchom renderowanie i przewiń do dzisiaj
+            renderPlan(true); 
+        };
+
     </script>
 </body>
 </html>
