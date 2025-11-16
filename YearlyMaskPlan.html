@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twój Całoroczny Plan Maseczek DIY</title>
+    <!-- Ładowanie Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Ustawienia globalne i niestandardowe style */
+        :root {
+            --color-primary: #34D399; /* Mięta */
+            --color-secondary: #059669; /* Ciemna Zieleń */
+            --color-bg-light: #F7FEE7; /* Jasny Krem */
+            --color-text: #1F2937;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg-light);
+            color: var(--color-text);
+        }
+
+        /* Styl dla karty maseczki dnia */
+        #current-mask-card {
+            box-shadow: 0 10px 15px -3px rgba(52, 211, 153, 0.3), 0 4px 6px -2px rgba(52, 211, 153, 0.1);
+            transition: all 0.3s ease-in-out;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* Animacja wejścia */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Style dla przycisków sezonowych */
+        .season-btn {
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .season-btn.active {
+            background-color: white !important;
+            color: var(--color-secondary);
+            border: 2px solid var(--color-primary);
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Style dla kart w widoku wszystkich maseczek */
+        .mask-item {
+            border-left: 5px solid var(--color-primary);
+            transition: transform 0.2s;
+        }
+        .mask-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="max-w-4xl mx-auto min-h-screen">
+
+        <!-- Nagłówek -->
+        <header class="bg-gradient-to-r from-green-400 to-emerald-500 text-white p-6 shadow-xl rounded-b-3xl mb-8">
+            <a href="DIYFaceMasks.html" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/90 hover:text-white transition duration-200 text-sm font-semibold p-2 rounded-lg hidden md:block">
+                ← Powrót do Przepisów
+            </a>
+            <h1 class="text-3xl font-extrabold text-center mb-1 drop-shadow-md">📆 Kalendarz Pielęgnacji Skóry</h1>
+            <p class="text-sm text-center opacity-90">Maseczka DIY idealna na ten tydzień roku!</p>
+        </header>
+
+        <main class="px-4 pb-12">
+
+            <!-- Sekcja Maseczka Tygodnia -->
+            <section class="mb-10">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Aktualna Maseczka (Tydzień: <span id="current-week-number"></span>)</h2>
+                
+                <div id="current-mask-card" class="bg-white p-6 rounded-xl border-t-8 border-green-500 mx-auto max-w-lg">
+                    <p class="text-sm font-medium text-green-600 mb-2" id="current-season"></p>
+                    <h3 class="text-2xl font-extrabold text-gray-900 mb-2" id="mask-name"></h3>
+                    <p class="text-base text-gray-700 mb-4" id="mask-goal"></p>
+
+                    <div class="space-y-3">
+                        <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+                            <h4 class="font-semibold text-green-800">Składniki i Instrukcja:</h4>
+                            <p class="text-sm text-gray-700 mt-1" id="mask-details"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <hr class="my-8 border-gray-200">
+
+            <!-- Sekcja Przegląd Całego Roku -->
+            <section>
+                <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Przegląd Całego Roku</h2>
+                
+                <!-- Filtr Sezonowy -->
+                <div class="flex flex-wrap justify-center gap-2 mb-6">
+                    <button data-season="Wiosna" class="season-btn bg-yellow-100 text-yellow-800 py-2 px-4 rounded-full text-sm hover:bg-yellow-200">🌱 Wiosna</button>
+                    <button data-season="Lato" class="season-btn bg-red-100 text-red-800 py-2 px-4 rounded-full text-sm hover:bg-red-200">☀️ Lato</button>
+                    <button data-season="Jesień" class="season-btn bg-orange-100 text-orange-800 py-2 px-4 rounded-full text-sm hover:bg-orange-200">🍂 Jesień</button>
+                    <button data-season="Zima" class="season-btn bg-blue-100 text-blue-800 py-2 px-4 rounded-full text-sm hover:bg-blue-200">❄️ Zima</button>
+                    <button data-season="Wszystkie" class="season-btn bg-gray-100 text-gray-800 py-2 px-4 rounded-full text-sm active hover:bg-gray-200">🔄 Wszystkie</button>
+                </div>
+                
+                <!-- Lista Maseczek -->
+                <div id="all-masks-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dynamicznie ładowane karty maseczek -->
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+        // --- BAZA DANYCH MASECZEK (52 TYGODNIE) ---
+        const maskData = [
+            // Wiosna: Oczyszczanie, Rozświetlanie i Odnowa (Tygodnie 1-13)
+            { week: 1, season: 'Wiosna', name: 'Jogurt & Cytryna', goal: 'Rozjaśnienie, Delikatne Złuszczanie (AHA)', details: '2 Łyżki Jogurtu Naturalnego, 1/2 Łyżeczki Soku z Cytryny, 1/2 Łyżeczki Miodu. Mieszaj, aplikuj na 10 min. (Test płatkowy obowiązkowy!).' },
+            { week: 2, season: 'Wiosna', name: 'Miętowo-Owsiana', goal: 'Ukojenie, Zwężenie Porów', details: '1 Łyżka zmielonych Płatków Owsianych, 1 Łyżeczka świeżych Liści Mięty (posiekanych), woda do pasty. Aplikuj na 15 min.' },
+            { week: 3, season: 'Wiosna', name: 'Kiwi & Banan', goal: 'Witamina C, Blask, Odżywienie', details: '1/2 Kiwi (enzymy), 1/2 Banana (nawilżenie), kilka kropli Oliwy. Blenduj, aplikuj na 20 min.' },
+            { week: 4, season: 'Wiosna', name: 'Truskawkowo-Miodowa', goal: 'Złuszczanie Enzymatyczne (Kwas Salicylowy)', details: '3 rozgniecione Truskawki, 1 Łyżka Miodu. Aplikuj na 10-15 min.' },
+            { week: 5, season: 'Wiosna', name: 'Ziemniak & Mleko', goal: 'Rozjaśnianie Przebarwień i Cieni', details: '1 Łyżka startego Surowego Ziemniaka, 1 Łyżka Mleka. Aplikuj na twarz i pod oczy na 15 min.' },
+            { week: 6, season: 'Wiosna', name: 'Różana Woda & Glinka', goal: 'Oczyszczanie, Minerały, Ukojenie', details: '1 Łyżeczka Glinki Białej/Zielonej, woda Różana do pasty. Aplikuj do wyschnięcia (ok. 10 min).' },
+            { week: 7, season: 'Wiosna', name: 'Ryżowa Pasta', goal: 'Anti-Aging, Wygładzenie', details: '2 Łyżki zmielonego Ryżu, Mleko Kokosowe do gęstej pasty. Użyj jako peeling i maseczka (10 min).' },
+            { week: 8, season: 'Wiosna', name: 'Aloes & Kurkuma', goal: 'Przeciwzapalna, Rozjaśniająca', details: '2 Łyżki Żelu Aloesowego, szczypta Kurkumy. Aplikuj na 15 min (uważaj na zabarwienie).' },
+            { week: 9, season: 'Wiosna', name: 'Marchewka & Jajko', goal: 'Witamina A (Beta-Karoten), Ujędrnianie', details: '1 Łyżka startej Marchewki, 1 Żółtko Jajka. Mieszaj, aplikuj na 20 min.' },
+            { week: 10, season: 'Wiosna', name: 'Ogórkowy Chłodnik', goal: 'Nawilżenie, Ukojenie, Idealna na Alergie', details: '1/2 Ogórka (zblendowane), 1 Łyżka Jogurtu. Aplikuj na 20 min.' },
+            { week: 11, season: 'Wiosna', name: 'Kawa & Cynamon', goal: 'Pobudzenie Krążenia, Drenaż', details: '1 Łyżka Fusów Kawy, 1/2 Łyżeczki Cynamonu, 1 Łyżka Miodu. Masuj delikatnie, pozostaw na 5 min.' },
+            { week: 12, season: 'Wiosna', name: 'Drożdże & Miód', goal: 'Redukcja Niedoskonałości (Wit. B)', details: '1/2 Kostki Drożdży, 1 Łyżka Miodu, odrobina Ciepłej Wody. Mieszaj, aplikuj na 15 min.' },
+            { week: 13, season: 'Wiosna', name: 'Złoty Eliksir', goal: 'Maksymalny Blask, Napięcie Skóry', details: '1 Łyżka Mąki Ziemniaczanej, Mleko do konsystencji. Aplikuj na 15 min.' },
+            
+            // Lato: Nawodnienie, Łagodzenie i Antyoksydanty (Tygodnie 14-26)
+            { week: 14, season: 'Lato', name: 'Arbuz & Miód', goal: 'Intensywne Nawodnienie i Minerały', details: '2 Łyżki zblendowanego Arbuza, 1 Łyżeczka Miodu. Nakładaj schłodzone na 20 min.' },
+            { week: 15, season: 'Lato', name: 'Aloes & Woda Różana', goal: 'Łagodzenie po Słońcu, Ukojenie', details: '2 Łyżki Żelu Aloesowego, 1 Łyżka Wody Różanej. Aplikuj na 15 min dla ochłodzenia.' },
+            { week: 16, season: 'Lato', name: 'Papaja & Mleko', goal: 'Złuszczanie Enzymatyczne (Papaina)', details: '1 Łyżka zblendowanej Papai, 1 Łyżeczka Mleka. Aplikuj na 10 min.' },
+            { week: 17, season: 'Lato', name: 'Pomidor & Owies', goal: 'Ochrona Antyoksydacyjna (Likopen)', details: '1/2 zblendowanego Pomidora, 1 Łyżka Mąki Owsianej. Mieszaj, aplikuj na 15 min.' },
+            { week: 18, season: 'Lato', name: 'Hydratacja Ogórkowa', goal: 'Orzeźwienie, Kurczenie Porów', details: 'Cienkie plastry Ogórka (schłodzone) lub Ogórek zblendowany. Aplikuj na 20 min.' },
+            { week: 19, season: 'Lato', name: 'Zielona Herbata & Glinka', goal: 'Detoks, Antyoksydanty', details: '1 Łyżeczka Glinki, mocny Napar Zielonej Herbaty (ostudzony) zamiast wody. Aplikuj na 10-15 min.' },
+            { week: 20, season: 'Lato', name: 'Melon & Kefir', goal: 'Nawilżenie, Probiotyki', details: '2 Łyżki zblendowanego Melona, 1 Łyżka Kefiru. Aplikuj na 15 min.' },
+            { week: 21, season: 'Lato', name: 'Czarna Porzeczka & Miód', goal: 'Mega Witamina C, Blask', details: 'Kilka zgniecionych Czarnych Porzeczek, 1 Łyżka Miodu. Aplikuj na 10 min. (Uważaj na barwienie).' },
+            { week: 22, season: 'Lato', name: 'Awokado & Mięta', goal: 'Nawilżenie, Ukojenie', details: '1/4 Awokado, 1 Łyżeczka posiekanej Mięty, 1 Łyżka Mleka. Aplikuj na 20 min.' },
+            { week: 23, season: 'Lato', name: 'Ryżowy Mleczny Peeling', goal: 'Ujędrnianie, Jedwabista Gładkość', details: '2 Łyżki Mąki Ryżowej, Mleko Ryżowe lub Woda do konsystencji. Masuj i pozostaw na 10 min.' },
+            { week: 24, season: 'Lato', name: 'Czerwona Porzeczka & Banan', goal: 'Antyoksydanty, Wygładzenie', details: 'Zgniecione Czerwone Porzeczki, 1/2 Banana. Aplikuj na 15 min.' },
+            { week: 25, season: 'Lato', name: 'Pianka z Białka Jaj', goal: 'Napinanie Skóry, Zwężanie Porów', details: '1 Białko Jaja (ubite na pianę), 1 Łyżeczka Soku z Limonki. Aplikuj pędzlem, pozostaw do wyschnięcia (15 min).' },
+            { week: 26, season: 'Lato', name: 'Kremowy Kokos', goal: 'Regeneracja Bariery Lipidowej', details: '2 Łyżki Tłustego Mleka Kokosowego (stała część), 1 Łyżka Mąki Owsianej. Aplikuj na 20 min.' },
+            
+            // Jesień: Odżywianie, Regeneracja i Wzmocnienie (Tygodnie 27-39)
+            { week: 27, season: 'Jesień', name: 'Dynia & Jajko', goal: 'Beta-Karoten, Ujędrnienie', details: '2 Łyżki Puree z Dyni (ugotowanej), 1 Żółtko Jajka. Aplikuj na 20 min.' },
+            { week: 28, season: 'Jesień', name: 'Miód & Oliwa', goal: 'Bariera Ochronna, Nawilżenie', details: '1 Łyżka Miodu, 1/2 Łyżeczki Oliwy z Oliwek Extra Virgin. Delikatnie wymieszaj, aplikuj na 15 min.' },
+            { week: 29, season: 'Jesień', name: 'Jogurt & Owsianka', goal: 'Łagodne Odżywienie i Złuszczanie', details: '2 Łyżki Jogurtu, 1 Łyżka Płatków Owsianych, 1/2 Banana. Aplikuj na 20 min.' },
+            { week: 30, season: 'Jesień', name: 'Żółtko & Olej Jojoba', goal: 'Intensywne Natłuszczenie (Zima), Anti-Aging', details: '1 Żółtko, 1 Łyżeczka Oleju Jojoba lub migdałowego. Aplikuj na 15 min.' },
+            { week: 31, season: 'Jesień', name: 'Batat & Cynamon', goal: 'Złożone Węglowodany, Wygładzanie', details: '1 Łyżka Puree z Batata (ugotowanego), szczypta Cynamonu, 1 Łyżeczka Mleka. Aplikuj na 15 min.' },
+            { week: 32, season: 'Jesień', name: 'Krem z Twarogu', goal: 'Białko, Ujędrnianie', details: '2 Łyżki Twarogu (chudy, rozgnieciony), odrobina Mleka. Aplikuj na 15-20 min.' },
+            { week: 33, season: 'Jesień', name: 'Masło Orzechowe & Miód', goal: 'Tłuszcze, Wygładzanie', details: '1 Łyżka Naturalnego Masła Orzechowego, 1 Łyżeczka Miodu. Aplikuj na 15 min. (Uważaj na zatykanie porów).' },
+            { week: 34, season: 'Jesień', name: 'Płatki Kukurydziane & Jogurt', goal: 'Delikatny Peeling, Wygładzanie', details: '1 Łyżka zmielonych Płatków Kukurydzianych, Jogurt. Aplikuj na 10 min.' },
+            { week: 35, season: 'Jesień', name: 'Gorzka Czekolada (Kakao)', goal: 'Silne Antyoksydanty (Flawonole)', details: '1 Łyżka Kakao Naturalnego, Ciepła Woda do pasty, 1/2 Łyżeczki Oliwy. Aplikuj na 20 min.' },
+            { week: 36, season: 'Jesień', name: 'Marchewka & Dynia', goal: 'Intensywny Koloryt i Odżywienie', details: '1 Łyżka Puree z Dyni, 1 Łyżka Puree z Marchewki. Aplikuj na 20 min.' },
+            { week: 37, season: 'Jesień', name: 'Siemię Lniane (Żel)', goal: 'Napinanie, Hydratacja', details: '1 Łyżka Siemię Lniane + 1/2 Szklanki Wody. Gotuj aż zgęstnieje. Ostudzony żel aplikuj na 20 min.' },
+            { week: 38, season: 'Jesień', name: 'Drożdże & Mleko', goal: 'Witamina B, Redukcja Niedoskonałości', details: '1/2 Kostki Drożdży, Mleko. Mieszaj, aplikuj na 15 min.' },
+            { week: 39, season: 'Jesień', name: 'Czerwone Winogrono', goal: 'Resweratrol, Przeciwstarzeniowo', details: 'Rozgnieć Winogrona, zmieszaj z Owsianką. Aplikuj na 15 min.' },
+            
+            // Zima: Ochrona, Anti-Aging i Maksymalne Nawilżenie (Tygodnie 40-52)
+            { week: 40, season: 'Zima', name: 'Banan & Miód & Oliwa', goal: 'Najlepsza Hydratacja Zimą', details: '1/2 dojrzałego Banana, 1 Łyżka Miodu, 1/2 Łyżeczki Oliwy. Aplikuj na 20-25 min.' },
+            { week: 41, season: 'Zima', name: 'Awokado & Masło Shea', goal: 'Głęboka Regeneracja, Witamina E', details: '1/4 Awokado, 1 Łyżeczka roztopionego Masła Shea lub Kokosowego. Aplikuj na 30 min (bogata, tłusta warstwa).' },
+            { week: 42, season: 'Zima', name: 'Płatki Owsiane & Mleko', goal: 'Ukojenie podrażnień, Odbudowa', details: 'Płatki Owsiane zmielone na mąkę, Ciepłe Mleko. Aplikuj na 20 min.' },
+            { week: 43, season: 'Zima', name: 'Olej z Kiełków Pszenicy', goal: 'Witamina E, Anti-Aging', details: '1 Żółtko, 1 Łyżeczka Miodu, 1/2 Łyżeczki Oleju z Kiełków Pszenicy lub Awokado. Aplikuj na 15 min.' },
+            { week: 44, season: 'Zima', name: 'Jajko & Olej Rycynowy', goal: 'Wygładzanie, Wzmocnienie', details: '1 Białko (ubite), 1/2 Łyżeczki Oleju Rycynowego. Aplikuj na 15 min, delikatnie zmyj.' },
+            { week: 45, season: 'Zima', name: 'Gorzka Czekolada & Jogurt', goal: 'Odżywienie, Antyoksydanty', details: '1 Łyżka Kakao, Jogurt Naturalny, 1 Łyżeczka Oliwy. Aplikuj na 20 min.' },
+            { week: 46, season: 'Zima', name: 'Chrzan & Śmietana', goal: 'Rozjaśnienie, Wzmocnienie (Ostrożnie!)', details: '1 Łyżeczka świeżo startego Chrzanu, 1 Łyżka Gęstej Śmietany. Tylko 5 minut! (Mocny test płatkowy!)' },
+            { week: 47, season: 'Zima', name: 'Mąka Ziemniaczana & Żółtko', goal: 'Lifting, Napięcie Skóry', details: '1 Łyżka Mąki Ziemniaczanej, 1 Żółtko. Aplikuj na 15 min, daje silny efekt napięcia.' },
+            { week: 48, season: 'Zima', name: 'Cytryna & Miód (Zima!)', goal: 'Redukcja Przebarwień (tylko w ciemne dni)', details: '1 Łyżeczka Miodu, 1/4 Łyżeczki Soku z Cytryny. Aplikuj na 10 min. (Konieczny filtr SPF 50 następnego dnia!).' },
+            { week: 49, season: 'Zima', name: 'Płatki Owsiane & Soda', goal: 'Głębokie Oczyszczanie', details: '1 Łyżka Mąki Owsianej, szczypta Sody Oczyszczonej, Woda. Aplikuj delikatnie masując, pozostaw na 5 min.' },
+            { week: 50, season: 'Zima', name: 'Olej Kokosowy & Jajko', goal: 'Witalność, Odżywienie', details: '1 Żółtko, 1 Łyżeczka Płynnego Oleju Kokosowego. Aplikuj na 15 min.' },
+            { week: 51, season: 'Zima', name: 'Kawa & Masło Shea', goal: 'Peeling & Natłuszczenie', details: 'Fusy Kawy (peeling), roztopione Masło Shea (natłuszczenie). Delikatnie masuj, zmyj.' },
+            { week: 52, season: 'Zima', name: 'Kremowy Banan & Cynamon', goal: 'Ukojenie, Ochrona', details: '1/2 Banana, 1 Łyżka Mleka, szczypta Cynamonu. Aplikuj na 20 min.' },
+        ];
+
+        // --- FUNKCJE JAVASCRIPT ---
+
+        /**
+         * Oblicza numer bieżącego tygodnia roku (1-53).
+         * Uwzględnia standard ISO 8601 (tydzień zaczyna się w poniedziałek).
+         */
+        function getCurrentWeekNumber() {
+            const date = new Date();
+            // Tworzymy kopię daty, aby nie modyfikować oryginału
+            const target = new Date(date.valueOf());
+
+            // Korekcja na początek tygodnia (poniedziałek)
+            const dayNr = (date.getDay() + 6) % 7;
+            target.setDate(target.getDate() - dayNr + 3);
+
+            // Pierwszy czwartek stycznia to tydzień 1
+            const firstThursday = target.valueOf();
+            target.setMonth(0, 1);
+            if (target.getDay() !== 4) {
+                target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+            }
+
+            // Obliczenie tygodnia
+            return 1 + Math.ceil((firstThursday - target) / 604800000); // 604800000 = ms w 7 dniach
+        }
+
+        /**
+         * Wyświetla maseczkę dla bieżącego tygodnia.
+         */
+        function displayCurrentMask() {
+            const currentWeek = getCurrentWeekNumber();
+            const currentMask = maskData.find(m => m.week === currentWeek) || maskData[maskData.length - 1]; // Fallback na 52. tydzień
+
+            document.getElementById('current-week-number').textContent = currentWeek;
+            document.getElementById('current-season').textContent = `${currentMask.season} | Tydzień ${currentMask.week}`;
+            document.getElementById('mask-name').textContent = currentMask.name;
+            document.getElementById('mask-goal').textContent = currentMask.goal;
+            document.getElementById('mask-details').textContent = currentMask.details;
+        }
+
+        /**
+         * Generuje kartę HTML dla pojedynczej maseczki.
+         * @param {Object} mask - obiekt maseczki.
+         * @returns {string} Kod HTML karty.
+         */
+        function createMaskCard(mask) {
+            let color, bgColor, textColor;
+
+            switch (mask.season) {
+                case 'Wiosna':
+                    color = 'border-green-400';
+                    bgColor = 'bg-green-50';
+                    textColor = 'text-green-800';
+                    break;
+                case 'Lato':
+                    color = 'border-red-400';
+                    bgColor = 'bg-red-50';
+                    textColor = 'text-red-800';
+                    break;
+                case 'Jesień':
+                    color = 'border-orange-400';
+                    bgColor = 'bg-orange-50';
+                    textColor = 'text-orange-800';
+                    break;
+                case 'Zima':
+                    color = 'border-blue-400';
+                    bgColor = 'bg-blue-50';
+                    textColor = 'text-blue-800';
+                    break;
+                default:
+                    color = 'border-gray-400';
+                    bgColor = 'bg-gray-50';
+                    textColor = 'text-gray-800';
+            }
+
+            return `
+                <div class="mask-item bg-white p-4 rounded-lg shadow-sm ${color}">
+                    <p class="text-xs font-semibold ${textColor} mb-1">${mask.season} | Tydzień ${mask.week}</p>
+                    <h4 class="text-lg font-bold text-gray-900 mb-2">${mask.name}</h4>
+                    <p class="text-sm text-gray-600 mb-3">${mask.goal}</p>
+                    <div class="${bgColor} p-3 rounded-md">
+                        <p class="text-xs font-medium text-gray-700">${mask.details}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Filtruje i renderuje listę wszystkich maseczek.
+         * @param {string} season - Pora roku do filtrowania ('Wiosna', 'Lato', 'Jesień', 'Zima' lub 'Wszystkie').
+         */
+        function renderAllMasks(season) {
+            const listElement = document.getElementById('all-masks-list');
+            listElement.innerHTML = '';
+            
+            const filteredMasks = season === 'Wszystkie' 
+                ? maskData 
+                : maskData.filter(mask => mask.season === season);
+
+            filteredMasks.forEach(mask => {
+                listElement.innerHTML += createMaskCard(mask);
+            });
+        }
+
+        /**
+         * Ustawia nasłuchiwanie na przyciski filtrów sezonowych.
+         */
+        function setupSeasonFilters() {
+            const buttons = document.querySelectorAll('.season-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const selectedSeason = event.target.dataset.season;
+                    
+                    // Usuń klasę 'active' ze wszystkich przycisków
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Dodaj klasę 'active' do klikniętego przycisku
+                    event.target.classList.add('active');
+                    
+                    renderAllMasks(selectedSeason);
+                });
+            });
+        }
+
+        // --- INICJALIZACJA ---
+        window.onload = function() {
+            displayCurrentMask();
+            renderAllMasks('Wszystkie'); // Wyświetlaj wszystkie domyślnie
+            setupSeasonFilters();
+        };
+
+    </script>
+</body>
+</html>
